@@ -1,1 +1,16 @@
-{"name":"ebanistería SASU","short_name":"ebanistería SASU","start_url":"./","display":"standalone","background_color":"#f1eee8","theme_color":"#171715","lang":"es"}
+{
+  "name": "Ebanistería SASU",
+  "short_name": "Ebanistería SASU",
+  "start_url": "./",
+  "display": "standalone",
+  "background_color": "#f1eee8",
+  "theme_color": "#171715",
+  "lang": "es",
+  "icons": [
+    {
+      "src": "icons/icon-180.png",
+      "sizes": "180x180",
+      "type": "image/png"
+    }
+  ]
+}
