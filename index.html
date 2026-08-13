@@ -1,0 +1,49 @@
+<!doctype html>
+<html lang="es"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#171715"><meta name="apple-mobile-web-app-capable" content="yes"><meta name="apple-mobile-web-app-status-bar-style" content="black-translucent"><meta name="apple-mobile-web-app-title" content="Ebanistería">
+<link rel="manifest" href="manifest.json"><link rel="apple-touch-icon" href="icons/icon-180.png"><title>Ebanistería</title>
+<style>
+:root{--bg:#f1eee8;--ink:#191917;--muted:#7b786f;--card:#fbfaf7;--line:#ded9cf;--dark:#1b1b18}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font-family:-apple-system,BlinkMacSystemFont,"SF Pro Display","Helvetica Neue",sans-serif}
+main{max-width:520px;margin:auto;padding:calc(22px + env(safe-area-inset-top)) 18px calc(28px + env(safe-area-inset-bottom))}
+header{display:flex;justify-content:space-between;align-items:center;margin-bottom:26px}.brand{font-size:13px;letter-spacing:.16em;text-transform:uppercase;font-weight:700}.sub{font-size:12px;color:var(--muted);margin-top:5px}
+.gear{border:0;background:var(--card);width:42px;height:42px;border-radius:50%;font-size:19px;box-shadow:0 2px 12px #0000000a}
+.hero{background:var(--dark);color:#fff;border-radius:28px;padding:27px 22px 24px;box-shadow:0 12px 30px #0002}.hero label{color:#aaa;font-size:12px;text-transform:uppercase;letter-spacing:.12em}.hoursrow{display:flex;align-items:center;gap:10px;margin-top:7px}.hours{width:100%;background:transparent;border:0;color:white;font-size:58px;font-weight:600;outline:0;padding:0}.unit{font-size:16px;color:#aaa}.slider{width:100%;accent-color:white;margin:13px 0 20px}
+.result{border-top:1px solid #ffffff25;padding-top:19px}.resultlabel{font-size:12px;color:#aaa}.price{font-size:42px;font-weight:700;margin:5px 0}.rate{font-size:13px;color:#aaa}
+.quick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-top:15px}.q{border:1px solid #ffffff25;background:#ffffff0b;color:#ddd;border-radius:11px;padding:9px 3px;font-size:12px}
+.section{margin-top:18px}.sectiontitle{font-size:12px;text-transform:uppercase;letter-spacing:.12em;color:var(--muted);margin:0 0 10px 4px}.card{background:var(--card);border:1px solid var(--line);border-radius:20px;padding:17px}.grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.field label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}.field input{width:100%;border:1px solid var(--line);background:#f6f4ef;border-radius:12px;padding:12px;font-size:17px;color:var(--ink)}
+.total{display:flex;justify-content:space-between;align-items:end;margin-top:14px;padding-top:15px;border-top:1px solid var(--line)}.total span:first-child{font-size:13px;color:var(--muted)}.total strong{font-size:28px}
+.settings{display:none}.settings.open{display:block}.note{font-size:11px;color:var(--muted);text-align:center;margin:18px 0}
+</style></head><body><main>
+<header><div><div class="brand">Ebanistería</div><div class="sub">Calculadora de presupuestos</div></div><button class="gear" onclick="toggleSettings()">⚙︎</button></header>
+
+<section class="hero"><label>Horas estimadas</label><div class="hoursrow"><input id="h" class="hours" type="number" min="0" max="300" step=".5" value="20"><span class="unit">h</span></div>
+<input id="slider" class="slider" type="range" min="0" max="200" step=".5" value="20">
+<div class="result"><div class="resultlabel">Mano de obra estimada</div><div id="labor" class="price">0 €</div><div id="rate" class="rate">0 €/h</div></div>
+<div class="quick"><button class="q" onclick="setH(10)">10 h</button><button class="q" onclick="setH(20)">20 h</button><button class="q" onclick="setH(40)">40 h</button><button class="q" onclick="setH(80)">80 h</button></div></section>
+
+<section class="section"><div class="sectiontitle">Costes adicionales</div><div class="card"><div class="grid">
+<div class="field"><label>Materiales</label><input id="mat" type="number" min="0" value="0"></div>
+<div class="field"><label>Herrajes</label><input id="her" type="number" min="0" value="0"></div>
+<div class="field"><label>Transporte</label><input id="tra" type="number" min="0" value="0"></div>
+<div class="field"><label>Imprevistos %</label><input id="imp" type="number" min="0" value="5"></div>
+</div><div class="total"><span>Precio estimado total</span><strong id="total">0 €</strong></div></div></section>
+
+<section id="settings" class="section settings"><div class="sectiontitle">Configuración interna</div><div class="card"><div class="grid">
+<div class="field"><label>Tarifa mínima €/h</label><input id="min" type="number" value="45"></div>
+<div class="field"><label>Tarifa máxima €/h</label><input id="max" type="number" value="65"></div>
+</div><div class="field" style="margin-top:12px"><label>Horas de referencia</label><input id="ref" type="number" value="80"></div></div></section>
+<div class="note">Uso interno · Los valores se guardan automáticamente en este dispositivo.</div>
+</main>
+<script>
+const ids=["h","mat","her","tra","imp","min","max","ref"],E=id=>document.getElementById(id);
+function euro(x){return new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(x)}
+function calc(){let h=+E("h").value||0,min=+E("min").value||45,max=+E("max").value||65,ref=+E("ref").value||80;
+E("slider").value=Math.min(h,200);let r=min+(max-min)*Math.exp(-h/(ref/2.3)),l=h*r;E("rate").textContent=r.toFixed(1)+" €/h";E("labor").textContent=euro(l);
+let base=l+(+E("mat").value||0)+(+E("her").value||0)+(+E("tra").value||0);E("total").textContent=euro(base*(1+(+E("imp").value||0)/100));ids.forEach(id=>localStorage.setItem("pro_"+id,E(id).value))}
+function setH(v){E("h").value=v;calc()} function toggleSettings(){E("settings").classList.toggle("open")}
+function load(){ids.forEach(id=>{let v=localStorage.getItem("pro_"+id);if(v!==null)E(id).value=v});calc()}
+ids.forEach(id=>E(id).addEventListener("input",calc));E("slider").addEventListener("input",()=>{E("h").value=E("slider").value;calc()});load();
+if("serviceWorker" in navigator)navigator.serviceWorker.register("sw.js");
+</script></body></html>
